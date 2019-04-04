@@ -41,7 +41,7 @@
     <!-- Formulaire des décisions -->
 
     <div class="container-fluid text-center">
-        {% if waitingDocuments | length > 0  %}
+        {% if contributor.documents | length > 0  %}
             <blockquote>La liste des documents n'ayant pas encore une décision de dépôt</blockquote>
             <table class="table">
                     <th class="text-center">Document DOI</th>
@@ -50,32 +50,13 @@
                     <th class="text-center">Date de la création de la décision </th>
                     <th class="text-center">Voulez-vous déposer dans HAL ? </th>
                 <tbdody>
-                {{ form_start(form,{'action': path('contributor_connexion')}) }}
-                    ciiiiiiiiiiii
-                    {% for document in form.documents %}
-                        ciiiiiiiiiiiii
-                        <tr>
-                            <td>{{ document.children.doi.vars.value }}</td>
-                            <td>{{ document.children.title.vars.value }}</td>
-                            <td>{{ document.children.decision.vars.data.content }}</td>
-                            <td>{{ document.children.createdAt.vars.value | date('Y-m-d H:i:s') }}</td>
-                            <td>
-                                <p>
-                                    <select name="D1">
-                                        <option>{{ document.children.decision.vars.choices[0].label }}</option>
-                                        <option>{{ document.children.decision.vars.choices[1].label }}</option>
-                                        <option>{{ document.children.decision.vars.choices[2].label }}</option>
-                                        <option>{{ document.children.decision.vars.choices[3].label }}</option>
-                                    </select>
-
-                                </p>
-                            </td>
-                        </tr>
-                        {{ form_row(document) }}
+                    {{ form_start(form,{'action': path('contributor_connexion')}) }}
+                    {% for document in contributor.documents %}
+                        {{ document.decision.id }}
                     {% endfor %}
+                    {{ form_end(form) }}
                 </tbdody>
             </table>
-            {{ form_end(form) }}
         {% else %}
             <blockquote>Vous n'avez aucun document en attente de dépôt</blockquote>
         {% endif %}

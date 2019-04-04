@@ -51,9 +51,6 @@ class ContributorType extends AbstractType
             ->add('save',SubmitType::class,[
                                                 'label' => 'Créer le compte'
                                            ])
-            ->add('decision', DecisionType::class,
-                                                      ['label' => 'Voulez-vous déposer votre Document sur HAL ?']
-                )
         ;
     }
 

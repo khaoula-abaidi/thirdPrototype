@@ -8,6 +8,7 @@ use App\Entity\Document;
 use App\Form\ConnexionContributorType;
 use App\Form\ContributorType;
 use App\Form\DecisionDocumentContributorType;
+use App\Form\DecisionType;
 use App\Repository\ContributorRepository;
 use App\Repository\DecisionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -73,84 +74,41 @@ class ContributorController extends AbstractController
     /**
      * @Route("/contributor/{id}", name="contributor_show", methods={"GET"})
      */
-    public function show(Contributor $contributor, Request $request,ContributorRepository $contributorRepository): Response
+    public function show(Contributor $contributor, Request $request,ContributorRepository $contributorRepository,$id): Response
     {
         /**
-         * Searching the Contributor's Documents
-         * Each Document's Decision that isTaken = False
+         * Searching the Contributor's Document's where Decision's  False
          */
-                     //   $documents = $contributor->getDocuments();
-        $documents = $contributor->getDocuments();
-        $waitingDocuments = [];
-        foreach ($documents as $document){
-
-                    if($document->getDecision()->getIsTaken()!=true)
-                        {
-                             $waitingDocuments[] = [ //  'document' => $document
-                                                    'document' => [
-
-                                                                    'doi' => $document->getDoi(),
-                                                                    'title' => $document->getTitle(),
-                                                                    'decisionContent' => $document->getDecision()->getContent(),
-                                                                    'isTaken' => $document->getDecision()->getIsTaken(),
-                                                                    'dateCreationDecision' => $document->getDecision()->getAllowedAt()
-
-                                                                     ]
-                             ];
-                        }
-                    else {
-                        $contributor->removeDocument($document);
-                    }
-                }
-                                                            //dump($waitingDocuments);die;
-                                                            //dump($documents);die;
+        $waitingDocuments  = $contributorRepository->findAllWaiting($contributor->getId());
         /**
          * Gerenating the Form related to the Contributor's Documents Not yet Published && Asking For publishing
          */
-
+          foreach ($contributor->getDocuments() as $document)
+                  {
+                      if($document->getDecision()->getIsTaken()==true)
+                      {$contributor->removeDocument($document);}
+                  }
         $form = $this->createForm(DecisionDocumentContributorType::class,$contributor);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /*
-             *
-             * Each document ( modifiedAt : actual date )
-             *             &&
-             * Updating the decision[
-             *                  content = Dépôt , En attente de construction , Refus Dépôt
-             *                 allowedAt = actual date
-             *                  isTaken = True /False depending with the choice
-             *
-             * ]
-             */
-            dump($form->getData());
-            $waitingDocuments=$contributor->getDocuments();
-            foreach ($waitingDocuments as $waitingDocument) {
-                $waitingDocument->getDecision()->setIsTaken(true);
-                $waitingDocument->getDecision()->setContent('Dépôt sur HAL');
-                $waitingDocument->getDecision()->setAllowedAt(\DateTime::class);
-                $this->getDoctrine()->getManager()->persist($waitingDocument);
-            }
-            $this->getDoctrine()->getManager()->flush();
-                                                      // dump($contributor);die;
+
             $this->addFlash('success','Vos décisions sont prises et sauvegardées sur HAL');
             return $this->redirectToRoute('contributor_new', [
                 'id' => $contributor->getId(),
             ]);
-        }
-        // fin formulaire
 
 
+    }
         return $this->render('contributor/show.html.twig', [
             'contributor' => $contributor,
-            'waitingDocuments' => $waitingDocuments,
             /*
             'waitingDecisions' => $waitingDecisions,
             */
             'form' => $form->createView()
-
         ]);
     }
+
 
     /**
      * @Route("/contributor/{id}/edit", name="contributor_edit", methods={"GET","POST"})
@@ -227,24 +185,7 @@ class ContributorController extends AbstractController
      */
     public function logout() : Response
     {
-        $this->addFlash('success','Déconnexion réussite');
+        //$this->addFlash('success','Déconnexion réussite');
         return $this->render('contributor/connexion.html.twig');
-    }
-    /**
-     * @Route("/contributor/{id}", name ="contributor_validation_connexion")
-     * @return Response
-     */
-    public function validation($id) : Response
-    {
-        $contributor = $this->getDoctrine()
-                            ->getRepository(Contributor::class)
-                            ->find($id);
-        if(!$contributor){
-            return $this->render('contributor/error.html.twig');
-        }
-        return $this->render('contributor/index.html.twig', [
-            'controller_name' => 'ContributorController',
-            'contributor' => $contributor,
-        ]);
     }
 }
