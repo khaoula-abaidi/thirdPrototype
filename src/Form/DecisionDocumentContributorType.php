@@ -22,12 +22,9 @@ class DecisionDocumentContributorType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-           // ->add('decision', DecisionType::class)
             ->add('save',SubmitType::class,[
                                 'label' => 'Valider les décisions',
-                                'attr' => [
-                                            'class' => 'btn btn-success'
-                                         ]
+
                                             ])
             ->add('reset',ResetType::class,[
                 'label' => 'Annuler'

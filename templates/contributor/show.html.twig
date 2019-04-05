@@ -43,20 +43,32 @@
     <div class="container-fluid text-center">
         {% if contributor.documents | length > 0  %}
             <blockquote>La liste des documents n'ayant pas encore une décision de dépôt</blockquote>
-            <table class="table">
-                    <th class="text-center">Document DOI</th>
-                    <th class="text-center">Titre du document</th>
-                    <th>Etat du dépôt du document sur HAL</th>
-                    <th class="text-center">Date de la création de la décision </th>
-                    <th class="text-center">Voulez-vous déposer dans HAL ? </th>
-                <tbdody>
-                    {{ form_start(form,{'action': path('contributor_connexion')}) }}
-                    {% for document in contributor.documents %}
-                        {{ document.decision.id }}
-                    {% endfor %}
-                    {{ form_end(form) }}
-                </tbdody>
+
+
+                {{ form_start(form,{'action': path('contributor_index')}) }}
+
+
+
+                    <table class="table">
+                        <th class="text-center">Document DOI</th>
+                        <th class="text-center">Titre du document</th>
+                        <th>Etat du dépôt du document sur HAL</th>
+                        <th class="text-center">Date de la création de la décision </th>
+                        <th class="text-center">Voulez-vous déposer dans HAL ? </th>
+
+                        <tbdody>
+                            {% for document in contributor.documents %}
+                                <tr>
+                                    <td> {{ document.doi }}</td>
+                                    <td>{{ document.title }}</td>
+                                    <td>{{ document.decision.content }}</td>
+                                    <td>{{ document.decision.allowedAt | date('Y-m-d à H:i:s') }}</td>
+                                    <td>Choix : {{ document.decision.id }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbdody>
             </table>
+            {{ form_end(form) }}
         {% else %}
             <blockquote>Vous n'avez aucun document en attente de dépôt</blockquote>
         {% endif %}
@@ -68,5 +80,3 @@
     <a href="{{ path('contributor_logout') }}" class="btn btn-primary my-2">Se déconnecter</a>
 
 {% endblock %}
-
-
